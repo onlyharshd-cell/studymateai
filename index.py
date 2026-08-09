@@ -41,7 +41,7 @@ client = genai.Client(
 # AUTHENTICATION / SQLITE
 # ============================================================
 
-DATABASE = "users.db"
+DATABASE = "/tmp/studymate.db"
 SESSION_DAYS = 7
 
 
