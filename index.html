@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyMate AI | Intelligent Study Assistant</title>
+<meta name="description" content="StudyMate AI - personalized AI study planning for college students.">
+
+<style>
+:root{
+    --bg:#070a11;
+    --panel:#0e131d;
+    --panel2:#121925;
+    --panel3:#182131;
+    --border:rgba(255,255,255,.08);
+    --text:#f5f7fb;
+    --muted:#8994a8;
+    --primary:#795cff;
+    --primary2:#9b86ff;
+    --blue:#4d9cff;
+    --green:#42d99b;
+    --orange:#ffb35c;
+    --red:#ff6975;
+    --shadow:0 25px 70px rgba(0,0,0,.3);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:
+      radial-gradient(circle at 50% -10%,rgba(121,92,255,.18),transparent 32%),
+      radial-gradient(circle at 100% 20%,rgba(77,156,255,.08),transparent 28%),
+      var(--bg);
+    color:var(--text);
+    min-height:100vh;
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+::-webkit-scrollbar{width:7px}
+::-webkit-scrollbar-thumb{background:#2a3445;border-radius:10px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* AUTH */
+.auth-screen{
+    min-height:100vh;
+    display:grid;
+    place-items:center;
+    padding:30px 18px;
+}
+.auth-wrap{
+    width:min(1050px,100%);
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    border:1px solid var(--border);
+    border-radius:28px;
+    overflow:hidden;
+    background:rgba(14,19,29,.86);
+    box-shadow:var(--shadow);
+    backdrop-filter:blur(25px);
+}
+.auth-brand{
+    padding:58px;
+    min-height:650px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    background:
+      radial-gradient(circle at 20% 15%,rgba(121,92,255,.22),transparent 35%),
+      linear-gradient(145deg,rgba(121,92,255,.08),transparent 55%);
+}
+.logo{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    font-weight:800;
+}
+.logo-mark{
+    width:42px;height:42px;border-radius:13px;
+    display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--primary),var(--blue));
+    box-shadow:0 10px 30px rgba(121,92,255,.3);
+}
+.brand-copy h1{
+    font-size:clamp(38px,5vw,64px);
+    line-height:.98;
+    letter-spacing:-3px;
+    max-width:530px;
+}
+.brand-copy h1 span{color:var(--primary2)}
+.brand-copy p{
+    color:var(--muted);
+    max-width:500px;
+    line-height:1.75;
+    margin-top:22px;
+    font-size:14px;
+}
+.feature-list{display:grid;gap:13px}
+.feature{
+    display:flex;gap:12px;align-items:center;
+    color:#cfd5e1;font-size:12px;
+}
+.feature-icon{
+    width:30px;height:30px;border-radius:9px;
+    display:grid;place-items:center;
+    background:rgba(121,92,255,.1);
+    color:var(--primary2);
+}
+.auth-card{
+    padding:48px;
+    background:rgba(9,13,21,.75);
+    display:flex;
+    align-items:center;
+}
+.auth-inner{width:100%;max-width:390px;margin:auto}
+.auth-inner h2{font-size:30px;letter-spacing:-1px;margin-bottom:8px}
+.auth-sub{color:var(--muted);font-size:12px;line-height:1.6;margin-bottom:28px}
+.auth-tabs{
+    display:grid;grid-template-columns:1fr 1fr;
+    padding:4px;background:#0a0f17;border:1px solid var(--border);
+    border-radius:12px;margin-bottom:22px;
+}
+.auth-tab{
+    border:0;background:transparent;color:var(--muted);
+    padding:10px;border-radius:9px;font-size:11px;font-weight:700;
+}
+.auth-tab.active{background:var(--panel3);color:#fff}
+.field{margin-bottom:15px}
+.field label{
+    display:block;font-size:10px;font-weight:700;
+    color:#c8cfdb;margin-bottom:7px;
+}
+.field input,.field select{
+    width:100%;height:47px;border-radius:11px;
+    border:1px solid var(--border);outline:none;
+    background:#090e16;color:#fff;padding:0 13px;font-size:12px;
+}
+.field input:focus,.field select:focus{
+    border-color:rgba(121,92,255,.7);
+    box-shadow:0 0 0 3px rgba(121,92,255,.09);
+}
+.password-wrap{position:relative}
+.password-wrap input{padding-right:70px}
+.show-pass{
+    position:absolute;right:9px;top:50%;transform:translateY(-50%);
+    border:0;background:transparent;color:var(--muted);font-size:10px;
+}
+.primary-btn{
+    width:100%;height:48px;border:0;border-radius:11px;
+    color:#fff;font-weight:800;font-size:12px;
+    background:linear-gradient(135deg,var(--primary),#5e49d8);
+    box-shadow:0 12px 28px rgba(121,92,255,.2);
+    transition:.2s;
+}
+.primary-btn:hover{transform:translateY(-1px)}
+.primary-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.auth-note{text-align:center;color:var(--muted);font-size:10px;margin-top:15px}
+.auth-note a{color:var(--primary2);cursor:pointer}
+.form-error{
+    color:#ff9ca3;background:rgba(255,105,117,.08);
+    border:1px solid rgba(255,105,117,.18);
+    border-radius:9px;padding:10px;font-size:10px;margin-bottom:14px;
+}
+.form-success{
+    color:#7ae5bc;background:rgba(66,217,155,.08);
+    border:1px solid rgba(66,217,155,.18);
+    border-radius:9px;padding:10px;font-size:10px;margin-bottom:14px;
+}
+
+/* APP */
+.app{min-height:100vh}
+.topbar{
+    height:70px;padding:0 4%;
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;
+    background:rgba(7,10,17,.78);backdrop-filter:blur(18px);
+    position:sticky;top:0;z-index:100;
+}
+.brand-title strong{display:block;font-size:14px}
+.brand-title span{display:block;color:var(--muted);font-size:8px;margin-top:2px}
+.user-area{display:flex;align-items:center;gap:10px}
+.user-name{font-size:10px;color:#cfd5e1}
+.avatar{
+    width:36px;height:36px;border-radius:50%;
+    display:grid;place-items:center;font-size:11px;font-weight:800;
+    background:linear-gradient(135deg,var(--primary),var(--blue));
+}
+.logout{
+    height:35px;padding:0 11px;border:1px solid var(--border);
+    border-radius:9px;background:var(--panel);color:var(--muted);font-size:10px;
+}
+.logout:hover{color:#fff;border-color:rgba(121,92,255,.4)}
+
+.layout{
+    width:min(1250px,92%);
+    margin:auto;padding:42px 0 90px;
+}
+.hero{display:flex;justify-content:space-between;gap:25px;align-items:end;margin-bottom:28px}
+.eyebrow{
+    display:inline-flex;align-items:center;gap:7px;
+    color:var(--primary2);font-size:9px;font-weight:800;letter-spacing:1.8px;
+    margin-bottom:10px;
+}
+.eyebrow:before{
+    content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--primary);box-shadow:0 0 12px var(--primary);
+}
+.hero h1{font-size:clamp(30px,4vw,48px);letter-spacing:-2px}
+.hero h1 span{color:var(--primary2)}
+.hero p{color:var(--muted);font-size:12px;margin-top:9px;line-height:1.6}
+.api-status{
+    display:flex;align-items:center;gap:7px;
+    border:1px solid var(--border);background:var(--panel);
+    border-radius:20px;padding:8px 12px;color:var(--muted);font-size:9px;
+}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--orange)}
+.status-dot.online{background:var(--green);box-shadow:0 0 10px rgba(66,217,155,.6)}
+.status-dot.offline{background:var(--red)}
+
+.card{
+    background:rgba(14,19,29,.9);
+    border:1px solid var(--border);
+    border-radius:18px;padding:22px;
+    box-shadow:0 18px 55px rgba(0,0,0,.12);
+}
+.grid-form{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.full{grid-column:1/-1}
+.form-title{font-size:13px;font-weight:800;margin-bottom:3px}
+.form-desc{color:var(--muted);font-size:9px;margin-bottom:17px}
+.subject-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.add-btn{
+    border:0;background:transparent;color:var(--primary2);
+    font-size:10px;font-weight:800;
+}
+.subjects{display:grid;gap:8px}
+.subject-row{
+    display:grid;grid-template-columns:1.3fr .8fr .85fr 36px;gap:7px;
+}
+.subject-row input,.subject-row select,.planner-field{
+    width:100%;height:44px;border:1px solid var(--border);
+    background:#090e16;color:#fff;border-radius:10px;outline:none;
+    padding:0 11px;font-size:10px;
+}
+.remove{
+    border:1px solid var(--border);background:transparent;color:var(--muted);
+    border-radius:10px;font-size:18px;
+}
+.remove:hover{color:var(--red)}
+.generate{
+    margin-top:16px;width:100%;height:50px;border:0;border-radius:11px;
+    color:#fff;font-size:12px;font-weight:800;
+    background:linear-gradient(135deg,var(--primary),#5e49d8);
+    box-shadow:0 12px 30px rgba(121,92,255,.2);
+}
+.generate:disabled{opacity:.55}
+
+.result{margin-top:35px}
+.result-header{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:18px}
+.result-header h2{font-size:27px;letter-spacing:-1px}
+.result-header p{color:var(--muted);font-size:10px;margin-top:5px}
+.secondary{
+    border:1px solid var(--border);background:var(--panel);
+    color:#d9deea;border-radius:9px;padding:9px 12px;font-size:10px;
+}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.stat{padding:16px;border:1px solid var(--border);background:var(--panel);border-radius:14px}
+.stat small{display:block;color:var(--muted);font-size:9px;margin-bottom:7px}
+.stat strong{font-size:22px}
+.content-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.section-title{margin-bottom:17px}
+.section-title h3{font-size:13px}
+.section-title p{font-size:9px;color:var(--muted);margin-top:4px}
+.priority-list{display:grid;gap:14px}
+.priority{display:grid;grid-template-columns:120px 1fr 55px;align-items:center;gap:10px}
+.priority-name{font-size:9px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{height:6px;background:#252e3d;border-radius:20px;overflow:hidden}
+.fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#6348de,#9a84ff)}
+.level{text-align:right;font-size:8px;color:var(--primary2);font-weight:800}
+.tasks{display:grid;gap:7px}
+.task{
+    display:flex;align-items:center;gap:9px;padding:10px;
+    border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.015)
+}
+.task input{accent-color:var(--primary)}
+.task-info{flex:1;min-width:0}
+.task-title{display:block;font-size:9px;font-weight:700}
+.task-sub{display:block;color:var(--muted);font-size:8px;margin-top:3px}
+.task-type{font-size:7px;color:var(--primary2);font-weight:800;text-transform:uppercase}
+.task-time{font-size:8px;color:#cbd2df;font-weight:700}
+.task.done .task-title{text-decoration:line-through;color:var(--muted)}
+.ai-card{
+    display:flex;gap:13px;padding:18px;margin-bottom:12px;
+    border:1px solid rgba(121,92,255,.2);border-radius:15px;
+    background:linear-gradient(135deg,rgba(121,92,255,.11),rgba(77,156,255,.03))
+}
+.ai-icon{
+    width:38px;height:38px;flex:none;border-radius:11px;
+    display:grid;place-items:center;background:rgba(121,92,255,.14);color:var(--primary2)
+}
+.ai-label{font-size:8px;font-weight:800;letter-spacing:1.5px;color:var(--primary2);display:block;margin-bottom:6px}
+.ai-text{font-size:10px;line-height:1.65;color:#cbd2df}
+.roadmap{display:grid;gap:8px}
+.day{border:1px solid var(--border);border-radius:11px;overflow:hidden}
+.day-head{
+    min-height:58px;padding:12px 14px;display:flex;align-items:center;
+    justify-content:space-between;gap:15px;background:rgba(255,255,255,.015);cursor:pointer
+}
+.day-head:hover{background:rgba(255,255,255,.03)}
+.day-title{font-size:10px;font-weight:800}
+.day-focus{font-size:8px;color:var(--muted);margin-top:4px}
+.day-total{font-size:8px;color:var(--primary2);font-weight:800}
+.day-body{display:none;padding:8px;gap:5px}
+.day.open .day-body{display:grid}
+.road-task{display:flex;align-items:center;gap:10px;padding:9px;border-radius:8px;background:rgba(255,255,255,.015)}
+.road-task-name{flex:1;font-size:8px}
+.road-task-sub{font-size:7px;color:var(--muted)}
+.road-task-time{font-size:8px;color:var(--primary2);font-weight:800}
+.strategy{display:grid;gap:8px;list-style:none}
+.strategy li{font-size:9px;color:#cbd2df;line-height:1.6;display:flex;gap:8px}
+.strategy li:before{content:"✓";color:var(--green);font-weight:800}
+.empty{font-size:10px;color:var(--muted)}
+
+.loader{
+    position:fixed;inset:0;z-index:999;display:grid;place-items:center;
+    background:rgba(4,6,10,.75);backdrop-filter:blur(8px)
+}
+.loader-box{width:min(340px,90%);padding:28px;text-align:center;border:1px solid var(--border);border-radius:17px;background:var(--panel)}
+.spinner{
+    width:35px;height:35px;border:3px solid #293243;border-top-color:var(--primary);
+    border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader strong{display:block;font-size:12px;margin-bottom:5px}
+.loader span{font-size:9px;color:var(--muted)}
+.toast{
+    position:fixed;right:20px;bottom:20px;z-index:1200;
+    padding:12px 14px;border:1px solid var(--border);border-radius:10px;
+    background:var(--panel2);color:#fff;font-size:10px;box-shadow:var(--shadow);
+    transform:translateY(15px);opacity:0;pointer-events:none;transition:.25s
+}
+.toast.show{transform:none;opacity:1}
+
+@media(max-width:850px){
+    .auth-wrap{grid-template-columns:1fr}
+    .auth-brand{min-height:auto;padding:35px}
+    .feature-list{display:none}
+    .auth-card{padding:35px}
+    .content-grid{grid-template-columns:1fr}
+}
+@media(max-width:650px){
+    .layout{width:92%;padding-top:30px}
+    .topbar{padding:0 4%}
+    .user-name{display:none}
+    .hero{display:block}
+    .api-status{display:inline-flex;margin-top:15px}
+    .grid-form{grid-template-columns:1fr}
+    .full{grid-column:auto}
+    .subject-row{grid-template-columns:1fr 36px}
+    .subject-row select{display:none}
+    .stats{grid-template-columns:1fr 1fr}
+    .result-header{align-items:start;flex-direction:column}
+    .auth-brand{display:none}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= AUTH ================= -->
+<section id="authScreen" class="auth-screen">
+    <div class="auth-wrap">
+
+        <div class="auth-brand">
+            <div class="logo">
+                <div class="logo-mark">✦</div>
+                <div>
+                    <strong>StudyMate AI</strong>
+                    <div style="font-size:8px;color:var(--muted);margin-top:2px">INTELLIGENT STUDY ASSISTANT</div>
+                </div>
+            </div>
+
+            <div class="brand-copy">
+                <div class="eyebrow">BUILT FOR COLLEGE STUDENTS</div>
+                <h1>Study less randomly.<br><span>Study with a plan.</span></h1>
+                <p>
+                    Turn your exam date, subjects, difficulty and available time
+                    into a personalized AI-powered study roadmap.
+                </p>
+            </div>
+
+            <div class="feature-list">
+                <div class="feature"><span class="feature-icon">✦</span> AI-generated personalized study plans</div>
+                <div class="feature"><span class="feature-icon">✓</span> Daily tasks and progress tracking</div>
+                <div class="feature"><span class="feature-icon">◈</span> Smart subject prioritization</div>
+            </div>
+        </div>
+
+        <div class="auth-card">
+            <div class="auth-inner">
+
+                <h2 id="authTitle">Welcome back</h2>
+                <p class="auth-sub" id="authSubtitle">
+                    Sign in to continue to your StudyMate dashboard.
+                </p>
+
+                <div class="auth-tabs">
+                    <button class="auth-tab active" id="loginTab">Login</button>
+                    <button class="auth-tab" id="registerTab">Create account</button>
+                </div>
+
+                <div id="authMessage"></div>
+
+                <form id="authForm">
+
+                    <div class="field hidden" id="nameField">
+                        <label>FULL NAME</label>
+                        <input id="nameInput" type="text" placeholder="e.g. Harsh Dwivedi" autocomplete="name">
+                    </div>
+
+                    <div class="field">
+                        <label>EMAIL</label>
+                        <input id="emailInput" type="email" placeholder="you@example.com" autocomplete="email" required>
+                    </div>
+
+                    <div class="field">
+                        <label>PASSWORD</label>
+                        <div class="password-wrap">
+                            <input id="passwordInput" type="password" placeholder="Minimum 6 characters" autocomplete="current-password" required>
+                            <button type="button" class="show-pass" id="showPassword">Show</button>
+                        </div>
+                    </div>
+
+                    <div class="field hidden" id="confirmField">
+                        <label>CONFIRM PASSWORD</label>
+                        <input id="confirmInput" type="password" placeholder="Repeat your password" autocomplete="new-password">
+                    </div>
+
+                    <button class="primary-btn" id="authButton" type="submit">
+                        Sign in
+                    </button>
+                </form>
+
+                <div class="auth-note" id="authSwitch">
+                    Don't have an account? <a>Create one</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ================= APP ================= -->
+<div id="app" class="app hidden">
+
+    <header class="topbar">
+        <div class="logo">
+            <div class="logo-mark" style="width:36px;height:36px;border-radius:11px">✦</div>
+            <div class="brand-title">
+                <strong>StudyMate AI</strong>
+                <span>INTELLIGENT STUDY ASSISTANT</span>
+            </div>
+        </div>
+
+        <div class="user-area">
+            <span class="user-name" id="topUserName"></span>
+            <div class="avatar" id="avatar"></div>
+            <button class="logout" id="logoutBtn">Logout</button>
+        </div>
+    </header>
+
+    <main class="layout">
+
+        <section class="hero">
+            <div>
+                <div class="eyebrow">AI STUDY PLANNER</div>
+                <h1>Plan smarter. <span>Study better.</span></h1>
+                <p id="welcomeText">Let's build your next study roadmap.</p>
+            </div>
+
+            <div class="api-status">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">Checking AI server...</span>
+            </div>
+        </section>
+
+        <!-- PLANNER -->
+        <section class="card" id="plannerCard">
+
+            <div class="form-title">Create your study plan</div>
+            <div class="form-desc">
+                Give StudyMate the details of your preparation and Gemini will build the roadmap.
+            </div>
+
+            <div class="grid-form">
+
+                <div class="field full">
+                    <label>WHAT ARE YOU PREPARING FOR?</label>
+                    <input class="planner-field" id="goal" type="text"
+                           placeholder="e.g. 3rd Semester End-Semester Examination">
+                </div>
+
+                <div class="field">
+                    <label>EXAM DATE</label>
+                    <input class="planner-field" id="examDate" type="date">
+                </div>
+
+                <div class="field">
+                    <label>DAILY STUDY TIME</label>
+                    <select class="planner-field" id="dailyHours">
+                        <option value="1">1 hour/day</option>
+                        <option value="2">2 hours/day</option>
+                        <option value="3">3 hours/day</option>
+                        <option value="4" selected>4 hours/day</option>
+                        <option value="5">5 hours/day</option>
+                        <option value="6">6 hours/day</option>
+                        <option value="8">8 hours/day</option>
+                        <option value="10">10 hours/day</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>PLANNING STYLE</label>
+                    <select class="planner-field" id="planningStyle">
+                        <option value="flexible">Flexible</option>
+                        <option value="morning">Morning Focus</option>
+                        <option value="evening">Evening Focus</option>
+                        <option value="balanced">Balanced</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>REVISION</label>
+                    <select class="planner-field" id="revision">
+                        <option value="true">Include Revision</option>
+                        <option value="false">Learning Only</option>
+                    </select>
+                </div>
+
+                <div class="field full">
+                    <div class="subject-head">
+                        <label style="margin:0">SUBJECTS</label>
+                        <button type="button" class="add-btn" id="addSubject">+ Add Subject</button>
+                    </div>
+
+                    <div class="subjects" id="subjects">
+                        <div class="subject-row">
+                            <input class="subject-name" type="text" placeholder="e.g. Data Structures">
+                            <select class="subject-difficulty">
+                                <option value="easy">Easy</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                            <select class="subject-confidence">
+                                <option value="1">Confidence 1/5</option>
+                                <option value="2">Confidence 2/5</option>
+                                <option value="3" selected>Confidence 3/5</option>
+                                <option value="4">Confidence 4/5</option>
+                                <option value="5">Confidence 5/5</option>
+                            </select>
+                            <button type="button" class="remove">×</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <button class="generate" id="generateBtn">✦ Generate My AI Study Plan</button>
+        </section>
+
+
+        <!-- RESULT -->
+        <section class="result hidden" id="result">
+
+            <div class="result-header">
+                <div>
+                    <div class="eyebrow">YOUR PERSONALIZED ROADMAP</div>
+                    <h2 id="planGoal">Study Plan</h2>
+                    <p id="planSubtitle"></p>
+                </div>
+                <button class="secondary" id="newPlan">← Create New Plan</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat"><small>📅 DAYS REMAINING</small><strong id="daysRemaining">0</strong></div>
+                <div class="stat"><small>⏱ DAILY HOURS</small><strong id="hoursStat">0</strong></div>
+                <div class="stat"><small>📚 PLANNED HOURS</small><strong id="plannedHours">0</strong></div>
+                <div class="stat"><small>📈 PROGRESS</small><strong id="progress">0%</strong></div>
+            </div>
+
+            <div class="content-grid">
+
+                <div class="card">
+                    <div class="section-title">
+                        <h3>Subject Priority</h3>
+                        <p>Where your study time should go first.</p>
+                    </div>
+                    <div class="priority-list" id="priorities"></div>
+                </div>
+
+                <div class="card">
+                    <div class="section-title">
+                        <h3>Today's Focus</h3>
+                        <p id="todayLabel">Your first set of tasks.</p>
+                    </div>
+                    <div class="tasks" id="todayTasks"></div>
+                </div>
+
+            </div>
+
+            <div class="ai-card">
+                <div class="ai-icon">✦</div>
+                <div>
+                    <span class="ai-label">STUDYMATE AI RECOMMENDS</span>
+                    <p class="ai-text" id="recommendation"></p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title">
+                    <h3>Full Study Roadmap</h3>
+                    <p>Your day-by-day preparation plan.</p>
+                </div>
+                <div class="roadmap" id="roadmap"></div>
+            </div>
+
+            <div class="card" style="margin-top:12px">
+                <div class="section-title">
+                    <h3>AI Study Strategy</h3>
+                    <p>Practical guidance for following your plan.</p>
+                </div>
+                <ul class="strategy" id="strategy"></ul>
+            </div>
+
+        </section>
+
+    
+<section class="card wide" id="adaptivePanel" style="margin-top:12px">
+<h3>🧠 Adaptive Intelligence</h3><div class="hint">StudyMate learns from your quizzes and study sessions instead of acting like a simple to-do list.</div>
+<div class="two">
+<div class="card"><b>⚡ Next Best Action</b><div id="nextAction" class="hint" style="margin-top:10px">Loading...</div><button id="nextBtn" class="mainbtn">Refresh decision</button></div>
+<div class="card"><b>📊 Knowledge Map</b><div id="knowledge" class="hint" style="margin-top:10px">Loading...</div><button id="mapBtn" class="mainbtn">Refresh map</button></div>
+</div>
+<div class="card" style="margin-top:10px"><b>📝 Daily AI Checkpoint</b><div class="two" style="margin-top:10px"><div class="field"><label>SUBJECT</label><input id="qSubject" placeholder="Data Structures"></div><div class="field"><label>TOPIC</label><input id="qTopic" placeholder="Binary Trees"></div></div><button id="qGen" class="mainbtn">Generate 5-question checkpoint</button><div id="quizArea"></div></div>
+<div class="card" style="margin-top:10px"><b>👨‍🏫 AI Tutor</b><div class="two" style="margin-top:10px"><div class="field"><label>SUBJECT</label><input id="tSubject" placeholder="Operating Systems"></div><div class="field"><label>TOPIC</label><input id="tTopic" placeholder="CPU Scheduling"></div></div><button id="tBtn" class="mainbtn">Teach me this</button><div id="teachArea" class="hint" style="margin-top:10px"></div></div>
+<div class="card" style="margin-top:10px"><b>📄 Syllabus / PYQ Intelligence</b><div class="hint">Upload a text-based PDF or TXT file and let AI identify high-priority topics.</div><input id="syllabusFile" type="file" accept=".pdf,.txt" style="color:#aaa"><button id="sBtn" class="mainbtn">Analyze with AI</button><div id="syllabusArea" class="hint" style="margin-top:10px"></div></div>
+</section>
+</main>
+</div>
+
+
+<!-- ================= LOADER ================= -->
+<div class="loader hidden" id="loader">
+    <div class="loader-box">
+        <div class="spinner"></div>
+        <strong id="loaderTitle">StudyMate is building your plan...</strong>
+        <span id="loaderText">Gemini is analyzing your subjects and available time.</span>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+/* ============================================================
+   CONFIG
+============================================================ */
+
+const API_URL = "https://YOUR-BACKEND-URL.com";
+const TOKEN_KEY = "studymate_access_token";
+const USER_KEY = "studymate_user";
+
+
+/* ============================================================
+   STATE
+============================================================ */
+
+let authMode = "login";
+let currentUser = null;
+let currentPlan = null;
+
+
+/* ============================================================
+   DOM
+============================================================ */
+
+const authScreen = document.getElementById("authScreen");
+const app = document.getElementById("app");
+
+const loginTab = document.getElementById("loginTab");
+const registerTab = document.getElementById("registerTab");
+
+const authTitle = document.getElementById("authTitle");
+const authSubtitle = document.getElementById("authSubtitle");
+const authButton = document.getElementById("authButton");
+const authForm = document.getElementById("authForm");
+const authSwitch = document.getElementById("authSwitch");
+const authMessage = document.getElementById("authMessage");
+
+const nameField = document.getElementById("nameField");
+const confirmField = document.getElementById("confirmField");
+
+const nameInput = document.getElementById("nameInput");
+const emailInput = document.getElementById("emailInput");
+const passwordInput = document.getElementById("passwordInput");
+const confirmInput = document.getElementById("confirmInput");
+
+const plannerCard = document.getElementById("plannerCard");
+const result = document.getElementById("result");
+const loader = document.getElementById("loader");
+const toast = document.getElementById("toast");
+
+
+/* ============================================================
+   INITIALIZE
+============================================================ */
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+    setDefaultExamDate();
+
+    bindEvents();
+
+    const token = localStorage.getItem(TOKEN_KEY);
+
+    if (!token) {
+        showAuth();
+        return;
+    }
+
+    await restoreSession();
+});
+
+
+/* ============================================================
+   EVENTS
+============================================================ */
+
+function bindEvents(){
+
+    loginTab.addEventListener("click", () => setAuthMode("login"));
+
+    registerTab.addEventListener("click", () => setAuthMode("register"));
+
+    authSwitch.addEventListener("click", () => {
+        setAuthMode(authMode === "login" ? "register" : "login");
+    });
+
+    document.getElementById("showPassword").addEventListener("click", () => {
+
+        const type = passwordInput.type === "password"
+            ? "text"
+            : "password";
+
+        passwordInput.type = type;
+
+        document.getElementById("showPassword").textContent =
+            type === "password" ? "Show" : "Hide";
+    });
+
+    authForm.addEventListener("submit", handleAuth);
+
+    document.getElementById("addSubject").addEventListener(
+        "click",
+        addSubject
+    );
+
+    document.addEventListener("click", event => {
+
+        if (event.target.classList.contains("remove")) {
+
+            const rows =
+                document.querySelectorAll(".subject-row");
+
+            if (rows.length <= 1) {
+                showToast("You need at least one subject.");
+                return;
+            }
+
+            event.target.closest(".subject-row").remove();
+        }
+
+    });
+
+    document.getElementById("generateBtn").addEventListener(
+        "click",
+        generatePlan
+    );
+
+    document.getElementById("newPlan").addEventListener(
+        "click",
+        () => {
+            result.classList.add("hidden");
+            plannerCard.classList.remove("hidden");
+            window.scrollTo({top:0,behavior:"smooth"});
+        }
+    );
+
+    document.getElementById("logoutBtn").addEventListener(
+        "click",
+        logout
+    );
+}
+
+
+/* ============================================================
+   AUTH MODE
+============================================================ */
+
+function setAuthMode(mode){
+
+    authMode = mode;
+
+    const register = mode === "register";
+
+    loginTab.classList.toggle("active", !register);
+    registerTab.classList.toggle("active", register);
+
+    nameField.classList.toggle("hidden", !register);
+    confirmField.classList.toggle("hidden", !register);
+
+    authTitle.textContent =
+        register ? "Create your account" : "Welcome back";
+
+    authSubtitle.textContent =
+        register
+        ? "Create your StudyMate account and start planning smarter."
+        : "Sign in to continue to your StudyMate dashboard.";
+
+    authButton.textContent =
+        register ? "Create account" : "Sign in";
+
+    authSwitch.innerHTML =
+        register
+        ? 'Already have an account? <a>Sign in</a>'
+        : "Don't have an account? <a>Create one</a>";
+
+    clearAuthMessage();
+}
+
+
+/* ============================================================
+   AUTH REQUEST
+============================================================ */
+
+async function handleAuth(event){
+
+    event.preventDefault();
+
+    clearAuthMessage();
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+        showAuthMessage("Please enter your email and password.", "error");
+        return;
+    }
+
+    if (authMode === "register") {
+
+        const name = nameInput.value.trim();
+        const confirm = confirmInput.value;
+
+        if (name.length < 2) {
+            showAuthMessage("Please enter your full name.", "error");
+            return;
+        }
+
+        if (password.length < 6) {
+            showAuthMessage("Password must contain at least 6 characters.", "error");
+            return;
+        }
+
+        if (password !== confirm) {
+            showAuthMessage("Passwords do not match.", "error");
+            return;
+        }
+
+    }
+
+    authButton.disabled = true;
+    authButton.textContent =
+        authMode === "register"
+        ? "Creating account..."
+        : "Signing in...";
+
+    try {
+
+        const endpoint =
+            authMode === "register"
+            ? "/api/auth/register"
+            : "/api/auth/login";
+
+        const body =
+            authMode === "register"
+            ? {
+                name: nameInput.value.trim(),
+                email,
+                password
+            }
+            : {
+                email,
+                password
+            };
+
+        const response = await fetch(
+            API_URL + endpoint,
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify(body)
+            }
+        );
+
+        const data = await readJSON(response);
+
+        if (!response.ok) {
+            throw new Error(
+                data.detail || "Authentication failed."
+            );
+        }
+
+        localStorage.setItem(
+            TOKEN_KEY,
+            data.access_token
+        );
+
+        localStorage.setItem(
+            USER_KEY,
+            JSON.stringify(data.user)
+        );
+
+        currentUser = data.user;
+
+        showApp();
+
+        showToast(
+            authMode === "register"
+            ? "Account created successfully."
+            : "Welcome back, " + data.user.name + "!"
+        );
+
+    } catch(error) {
+
+        showAuthMessage(
+            error.message || "Could not connect to the backend.",
+            "error"
+        );
+
+    } finally {
+
+        authButton.disabled = false;
+
+        authButton.textContent =
+            authMode === "register"
+            ? "Create account"
+            : "Sign in";
+    }
+}
+
+
+/* ============================================================
+   SESSION RESTORE
+============================================================ */
+
+async function restoreSession(){
+
+    const token = localStorage.getItem(TOKEN_KEY);
+
+    try {
+
+        const response = await fetch(
+            API_URL + "/api/auth/me",
+            {
+                headers:{
+                    "Authorization":"Bearer " + token
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Session expired.");
+        }
+
+        const data = await response.json();
+
+        currentUser = data.user;
+
+        localStorage.setItem(
+            USER_KEY,
+            JSON.stringify(currentUser)
+        );
+
+        showApp();
+
+    } catch(error) {
+
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
+
+        showAuth();
+    }
+}
+
+
+/* ============================================================
+   LOGOUT
+============================================================ */
+
+async function logout(){
+
+    const token = localStorage.getItem(TOKEN_KEY);
+
+    try {
+
+        if (token) {
+
+            await fetch(
+                API_URL + "/api/auth/logout",
+                {
+                    method:"POST",
+                    headers:{
+                        "Authorization":"Bearer " + token
+                    }
+                }
+            );
+        }
+
+    } catch(error) {
+        console.warn("Logout request failed:", error);
+    }
+
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+
+    currentUser = null;
+    currentPlan = null;
+
+    showAuth();
+
+    showToast("You have been logged out.");
+}
+
+
+/* ============================================================
+   SHOW AUTH / APP
+============================================================ */
+
+function showAuth(){
+
+    app.classList.add("hidden");
+    authScreen.classList.remove("hidden");
+
+    setAuthMode("login");
+
+    passwordInput.value = "";
+    confirmInput.value = "";
+}
+
+function showApp(){
+
+    authScreen.classList.add("hidden");
+    app.classList.remove("hidden");
+
+    updateUserUI();
+
+    checkServer();
+}
+
+
+/* ============================================================
+   USER UI
+============================================================ */
+
+function updateUserUI(){
+
+    if (!currentUser) return;
+
+    document.getElementById("topUserName").textContent =
+        currentUser.name;
+
+    const initials =
+        currentUser.name
+            .split(" ")
+            .filter(Boolean)
+            .slice(0,2)
+            .map(part => part[0].toUpperCase())
+            .join("");
+
+    document.getElementById("avatar").textContent =
+        initials || "U";
+
+    document.getElementById("welcomeText").textContent =
+        `Welcome, ${currentUser.name}. Let's build your next study roadmap.`;
+}
+
+
+/* ============================================================
+   SERVER CHECK
+============================================================ */
+
+async function checkServer(){
+
+    const dot = document.getElementById("statusDot");
+    const text = document.getElementById("statusText");
+
+    dot.className = "status-dot";
+    text.textContent = "Checking AI server...";
+
+    try {
+
+        const response = await fetch(
+            API_URL + "/api/health"
+        );
+
+        if (!response.ok) throw new Error();
+
+        dot.classList.add("online");
+
+        text.textContent =
+            "AI server online";
+
+    } catch {
+
+        dot.classList.add("offline");
+
+        text.textContent =
+            "AI server offline";
+    }
+}
+
+
+/* ============================================================
+   ADD SUBJECT
+============================================================ */
+
+function addSubject(){
+
+    const row = document.createElement("div");
+
+    row.className = "subject-row";
+
+    row.innerHTML = `
+        <input class="subject-name" type="text" placeholder="e.g. Database Management">
+
+        <select class="subject-difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+
+        <select class="subject-confidence">
+            <option value="1">Confidence 1/5</option>
+            <option value="2">Confidence 2/5</option>
+            <option value="3" selected>Confidence 3/5</option>
+            <option value="4">Confidence 4/5</option>
+            <option value="5">Confidence 5/5</option>
+        </select>
+
+        <button type="button" class="remove">×</button>
+    `;
+
+    document.getElementById("subjects").appendChild(row);
+}
+
+
+/* ============================================================
+   GENERATE PLAN
+============================================================ */
+
+async function generatePlan(){
+
+    const goal =
+        document.getElementById("goal").value.trim();
+
+    const examDate =
+        document.getElementById("examDate").value;
+
+    const dailyHours =
+        Number(document.getElementById("dailyHours").value);
+
+    const planningStyle =
+        document.getElementById("planningStyle").value;
+
+    const includeRevision =
+        document.getElementById("revision").value === "true";
+
+    if (!goal) {
+        showToast("Enter what you are preparing for.");
+        return;
+    }
+
+    if (!examDate) {
+        showToast("Select your exam date.");
+        return;
+    }
+
+    const exam = new Date(examDate + "T00:00:00");
+    const today = new Date();
+
+    today.setHours(0,0,0,0);
+
+    if (exam <= today) {
+        showToast("Exam date must be in the future.");
+        return;
+    }
+
+    const subjects = [];
+
+    document.querySelectorAll(".subject-row").forEach(row => {
+
+        const name =
+            row.querySelector(".subject-name").value.trim();
+
+        if (!name) return;
+
+        subjects.push({
+            name,
+            difficulty:
+                row.querySelector(".subject-difficulty").value,
+            confidence:
+                Number(
+                    row.querySelector(".subject-confidence").value
+                ),
+            topics:[]
+        });
+
+    });
+
+    if (!subjects.length) {
+        showToast("Add at least one subject.");
+        return;
+    }
+
+    const token =
+        localStorage.getItem(TOKEN_KEY);
+
+    setLoading(
+        true,
+        "StudyMate is building your plan...",
+        "Gemini is analyzing your exam, subjects and available time."
+    );
+
+    try {
+
+        const response = await fetch(
+            API_URL + "/api/study-plan",
+            {
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json",
+                    ...(token
+                        ? {"Authorization":"Bearer " + token}
+                        : {})
+                },
+
+                body:JSON.stringify({
+                    goal,
+                    exam_date:examDate,
+                    daily_hours:dailyHours,
+                    subjects,
+                    preferred_session:planningStyle,
+                    include_revision:includeRevision,
+                    include_practice:true
+                })
+            }
+        );
+
+        const data = await readJSON(response);
+
+        if (!response.ok) {
+            throw new Error(
+                data.detail || "Unable to generate the study plan."
+            );
+        }
+
+        currentPlan = data;
+
+        renderPlan(data);
+
+    } catch(error) {
+
+        console.error(error);
+
+        showToast(
+            error.message ||
+            "Could not connect to StudyMate backend."
+        );
+
+    } finally {
+
+        setLoading(false);
+    }
+}
+
+
+/* ============================================================
+   RENDER PLAN
+============================================================ */
+
+function renderPlan(plan){
+
+    plannerCard.classList.add("hidden");
+    result.classList.remove("hidden");
+
+    document.getElementById("planGoal").textContent =
+        plan.goal;
+
+    document.getElementById("planSubtitle").textContent =
+        `Exam date: ${plan.exam_date}`;
+
+    document.getElementById("daysRemaining").textContent =
+        plan.days_remaining;
+
+    document.getElementById("hoursStat").textContent =
+        plan.daily_hours;
+
+    document.getElementById("plannedHours").textContent =
+        plan.total_planned_hours;
+
+    document.getElementById("recommendation").textContent =
+        plan.ai_recommendation || "Stay consistent with your plan.";
+
+    renderPriorities(plan.subject_priorities || []);
+    renderToday(plan.daily_plan || []);
+    renderRoadmap(plan.daily_plan || []);
+    renderStrategy(plan.strategy || []);
+
+    updateProgress();
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+}
+
+
+/* ============================================================
+   PRIORITIES
+============================================================ */
+
+function renderPriorities(items){
+
+    const container =
+        document.getElementById("priorities");
+
+    container.innerHTML = "";
+
+    if (!items.length) {
+        container.innerHTML =
+            '<div class="empty">No priority data available.</div>';
+        return;
+    }
+
+    items.forEach(item => {
+
+        const priority =
+            String(item.priority || "").toLowerCase();
+
+        const percentage =
+            priority.includes("high")
+            ? 90
+            : priority.includes("medium")
+            ? 65
+            : 40;
+
+        const div = document.createElement("div");
+
+        div.className = "priority";
+
+        div.innerHTML = `
+            <div class="priority-name" title="${escapeHTML(item.subject)}">
+                ${escapeHTML(item.subject)}
+            </div>
+
+            <div class="bar">
+                <div class="fill" style="width:${percentage}%"></div>
+            </div>
+
+            <div class="level">
+                ${escapeHTML(item.priority || "Normal")}
+            </div>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+
+/* ============================================================
+   TODAY
+============================================================ */
+
+function renderToday(days){
+
+    const container =
+        document.getElementById("todayTasks");
+
+    container.innerHTML = "";
+
+    if (!days.length) {
+        container.innerHTML =
+            '<div class="empty">No tasks available.</div>';
+        return;
+    }
+
+    const today = days[0];
+
+    document.getElementById("todayLabel").textContent =
+        `${today.date} • ${today.focus}`;
+
+    const tasks =
+        (today.tasks || [])
+            .filter(task => task.type !== "break");
+
+    if (!tasks.length) {
+        container.innerHTML =
+            '<div class="empty">No tasks scheduled today.</div>';
+        return;
+    }
+
+    tasks.forEach(task => {
+
+        const item = document.createElement("div");
+
+        item.className = "task";
+
+        item.innerHTML = `
+            <input type="checkbox" class="task-check">
+
+            <div class="task-info">
+                <span class="task-title">
+                    ${escapeHTML(task.title)}
+                </span>
+
+                <span class="task-sub">
+                    ${escapeHTML(task.subject)}
+                </span>
+            </div>
+
+            <span class="task-type">
+                ${escapeHTML(task.type)}
+            </span>
+
+            <span class="task-time">
+                ${Number(task.duration_minutes)}m
+            </span>
+        `;
+
+        const checkbox =
+            item.querySelector(".task-check");
+
+        checkbox.addEventListener("change", () => {
+
+            item.classList.toggle(
+                "done",
+                checkbox.checked
+            );
+
+            updateProgress();
+        });
+
+        container.appendChild(item);
+    });
+}
+
+
+/* ============================================================
+   ROADMAP
+============================================================ */
+
+function renderRoadmap(days){
+
+    const container =
+        document.getElementById("roadmap");
+
+    container.innerHTML = "";
+
+    if (!days.length) {
+        container.innerHTML =
+            '<div class="empty">No roadmap generated.</div>';
+        return;
+    }
+
+    days.forEach((day,index) => {
+
+        const card = document.createElement("div");
+
+        card.className =
+            "day" + (index === 0 ? " open" : "");
+
+        const tasks =
+            (day.tasks || [])
+                .filter(task => task.type !== "break");
+
+        const taskHTML = tasks.map(task => `
+            <div class="road-task">
+                <span class="road-task-name">
+                    ${escapeHTML(task.title)}
+                </span>
+
+                <span class="road-task-sub">
+                    ${escapeHTML(task.subject)}
+                </span>
+
+                <span class="road-task-time">
+                    ${Number(task.duration_minutes)}m
+                </span>
+            </div>
+        `).join("");
+
+        card.innerHTML = `
+            <div class="day-head">
+                <div>
+                    <div class="day-title">Day ${day.day}</div>
+                    <div class="day-focus">
+                        ${escapeHTML(day.date)}
+                        •
+                        ${escapeHTML(day.focus)}
+                    </div>
+                </div>
+
+                <div class="day-total">
+                    ${Number(day.total_minutes)} minutes
+                </div>
+            </div>
+
+            <div class="day-body">
+                ${taskHTML || '<div class="empty">No tasks.</div>'}
+            </div>
+        `;
+
+        card.querySelector(".day-head").addEventListener(
+            "click",
+            () => card.classList.toggle("open")
+        );
+
+        container.appendChild(card);
+    });
+}
+
+
+/* ============================================================
+   STRATEGY
+============================================================ */
+
+function renderStrategy(items){
+
+    const container =
+        document.getElementById("strategy");
+
+    container.innerHTML = "";
+
+    items.forEach(item => {
+
+        const li = document.createElement("li");
+
+        li.textContent = item;
+
+        container.appendChild(li);
+    });
+}
+
+
+/* ============================================================
+   PROGRESS
+============================================================ */
+
+function updateProgress(){
+
+    const checks =
+        document.querySelectorAll(".task-check");
+
+    if (!checks.length) {
+        document.getElementById("progress").textContent = "0%";
+        return;
+    }
+
+    let completed = 0;
+
+    checks.forEach(check => {
+        if (check.checked) completed++;
+    });
+
+    const percent =
+        Math.round(
+            completed / checks.length * 100
+        );
+
+    document.getElementById("progress").textContent =
+        percent + "%";
+}
+
+
+/* ============================================================
+   DEFAULT DATE
+============================================================ */
+
+function setDefaultExamDate(){
+
+    const date = new Date();
+
+    date.setDate(
+        date.getDate() + 30
+    );
+
+    document.getElementById("examDate").value =
+        date.toISOString().split("T")[0];
+}
+
+
+/* ============================================================
+   HELPERS
+============================================================ */
+
+async function readJSON(response){
+
+    const text = await response.text();
+
+    try {
+        return text ? JSON.parse(text) : {};
+    } catch {
+        return {
+            detail:
+                text ||
+                "Server returned an invalid response."
+        };
+    }
+}
+
+function escapeHTML(value){
+
+    const div = document.createElement("div");
+
+    div.textContent = value ?? "";
+
+    return div.innerHTML;
+}
+
+function showAuthMessage(message,type){
+
+    authMessage.innerHTML =
+        `<div class="${type === "error" ? "form-error" : "form-success"}">
+            ${escapeHTML(message)}
+        </div>`;
+}
+
+function clearAuthMessage(){
+    authMessage.innerHTML = "";
+}
+
+let toastTimer;
+
+function showToast(message){
+
+    clearTimeout(toastTimer);
+
+    toast.textContent = message;
+
+    toast.classList.add("show");
+
+    toastTimer = setTimeout(
+        () => toast.classList.remove("show"),
+        3500
+    );
+}
+
+function setLoading(active,title="",text=""){
+
+    loader.classList.toggle(
+        "hidden",
+        !active
+    );
+
+    if (title) {
+        document.getElementById("loaderTitle").textContent =
+            title;
+    }
+
+    if (text) {
+        document.getElementById("loaderText").textContent =
+            text;
+    }
+}
+
+
+// ===== StudyMate adaptive feature layer =====
+async function smart(path, options={}) { return api(path, options); }
+
+async function loadKnowledgeMap(){
+  try{
+    const d=await smart('/api/knowledge-map');
+    const a=d.subjects||[];
+    if(!a.length){$('knowledge').textContent='Add subjects to start your knowledge map.';return;}
+    $('knowledge').innerHTML=a.map(x=>`<div style="margin:7px 0"><b>${esc(x.subject)}</b> <span style="float:right;color:var(--p2)">${Math.round(x.mastery*100)}%</span><br><small>${Math.round(x.quiz_accuracy*100)}% quiz accuracy • ${x.study_minutes||0} study minutes</small></div>`).join('');
+  }catch(e){$('knowledge').textContent=e.message}
+}
+
+async function loadNextAction(){
+  try{
+    const d=await smart('/api/next-action',{method:'POST',body:JSON.stringify({goal:$('goal')?.value||'',exam_date:$('examDate')?.value||null})});
+    $('nextAction').innerHTML=`<b>${esc(d.title)}</b><br>${esc(d.reason)}<br><span style="color:var(--p2)">${esc(d.subject||'')} • ${d.duration_minutes||30} min</span>`;
+  }catch(e){$('nextAction').textContent=e.message}
+}
+
+$('mapBtn')?.addEventListener('click',loadKnowledgeMap);
+$('nextBtn')?.addEventListener('click',loadNextAction);
+
+$('qGen')?.addEventListener('click',async()=>{
+  const subject=$('qSubject').value.trim(), topic=$('qTopic').value.trim();
+  if(!subject||!topic)return alert('Enter a subject and topic.');
+  try{
+    loading(true,'Generating checkpoint...','The AI is testing actual understanding.');
+    const d=await smart('/api/quiz/generate',{method:'POST',body:JSON.stringify({subject,topic,count:5,difficulty:'medium'})});
+    window.studyMateQuiz=d;
+    $('quizArea').innerHTML=(d.questions||[]).map((q,i)=>`<div style="border:1px solid var(--line);padding:11px;border-radius:9px;margin-top:8px"><b style="font-size:10px">${i+1}. ${esc(q.question)}</b><div>${q.options.map((o,j)=>`<button class="quizOption" data-q="${i}" data-a="${j}" style="display:block;width:100%;text-align:left;margin-top:5px;background:#080d15;color:#ddd;border:1px solid var(--line);border-radius:7px;padding:8px;font-size:9px">${esc(o)}</button>`).join('')}</div></div>`).join('')+'<button id="quizSubmit" class="mainbtn">Submit checkpoint</button>';
+    document.querySelectorAll('.quizOption').forEach(b=>b.onclick=()=>{document.querySelectorAll(`.quizOption[data-q="${b.dataset.q}"]`).forEach(x=>x.style.borderColor='var(--line)');b.style.borderColor='var(--p)';b.classList.add('chosen')});
+    $('quizSubmit').onclick=async()=>{
+      let score=0;const qs=d.questions||[];
+      qs.forEach((q,i)=>{const chosen=document.querySelector(`.quizOption.chosen[data-q="${i}"]`);if(chosen&&Number(chosen.dataset.a)===Number(q.answer))score++});
+      try{const r=await smart('/api/quiz/submit',{method:'POST',body:JSON.stringify({subject:d.subject,topic:d.topic,score,total:qs.length})});$('quizArea').insertAdjacentHTML('afterbegin',`<div class="hint" style="border:1px solid #45d99b33;padding:9px;border-radius:8px">Score <b>${score}/${qs.length}</b> • Mastery <b>${Math.round(r.mastery*100)}%</b><br>${esc(r.message)}</div>`);loadKnowledgeMap();loadNextAction()}catch(e){alert(e.message)}
+    };
+  }catch(e){alert(e.message)}finally{loading(false)}
+});
+
+$('tBtn')?.addEventListener('click',async()=>{
+  const subject=$('tSubject').value.trim(),topic=$('tTopic').value.trim();if(!subject||!topic)return alert('Enter a subject and topic.');
+  try{loading(true,'AI tutor is preparing...','Building an explanation, example and checkpoint.');const d=await smart('/api/teach',{method:'POST',body:JSON.stringify({subject,topic,level:'exam'})});$('teachArea').innerHTML=`<b style="color:white">${esc(d.title)}</b><p>${esc(d.explanation)}</p><p><b>Example:</b> ${esc(d.example)}</p><p><b>Common mistake:</b> ${esc(d.common_mistake)}</p><p><b>Checkpoint:</b> ${esc(d.checkpoint)}</p><p><b>Next:</b> ${esc(d.next_step)}</p>`}catch(e){$('teachArea').textContent=e.message}finally{loading(false)}
+});
+
+$('sBtn')?.addEventListener('click',async()=>{
+  const file=$('syllabusFile').files[0];if(!file)return alert('Choose a PDF or TXT file.');
+  const fd=new FormData();fd.append('file',file);
+  try{loading(true,'Analyzing syllabus...','Extracting units and high-priority topics.');const r=await fetch(API_URL+'/api/syllabus/analyze',{method:'POST',headers:{Authorization:'Bearer '+localStorage.getItem(TOKEN_KEY)},body:fd});const d=await r.json();if(!r.ok)throw Error(d.detail||'Analysis failed');$('syllabusArea').innerHTML=`<b>${esc(d.title||'Syllabus analysis')}</b><br><br><b>High priority:</b><br>${(d.high_priority_topics||[]).map(esc).join('<br>')}<br><br><b>Start with:</b> ${(d.suggested_first_topics||[]).map(esc).join(', ')}<br><br>${esc(d.exam_strategy||'')}`}catch(e){$('syllabusArea').textContent=e.message}finally{loading(false)}
+});
+
+const _showApp=showApp;
+showApp=function(){_showApp();setTimeout(()=>{loadKnowledgeMap();loadNextAction()},300)};
+</script>
+
+</body>
+</html>
