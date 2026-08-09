@@ -667,7 +667,7 @@ button{cursor:pointer}
    CONFIG
 ============================================================ */
 
-const API_URL = "https://YOUR-BACKEND-URL.com";
+const API_URL = "https://studymateai-weld.vercel.app";
 const TOKEN_KEY = "studymate_access_token";
 const USER_KEY = "studymate_user";
 
@@ -1688,6 +1688,46 @@ function setLoading(active,title="",text=""){
     }
 }
 
+
+// ===== StudyMate API helper =====
+async function api(path, options = {}) {
+    const token = localStorage.getItem(TOKEN_KEY);
+
+    const headers = new Headers(options.headers || {});
+
+    if (!(options.body instanceof FormData) && !headers.has("Content-Type")) {
+        headers.set("Content-Type", "application/json");
+    }
+
+    if (token) {
+        headers.set("Authorization", "Bearer " + token);
+    }
+
+    const response = await fetch(API_URL + path, {
+        ...options,
+        headers
+    });
+
+    const data = await readJSON(response);
+
+    if (!response.ok) {
+        throw new Error(
+            data.detail ||
+            data.message ||
+            `Request failed (${response.status}).`
+        );
+    }
+
+    return data;
+}
+
+function esc(value) {
+    return escapeHTML(value);
+}
+
+function loading(active, title = "", text = "") {
+    setLoading(active, title, text);
+}
 
 // ===== StudyMate adaptive feature layer =====
 async function smart(path, options={}) { return api(path, options); }
