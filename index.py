@@ -22,18 +22,17 @@ import time
 # ============================================================
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    raise RuntimeError("GEMINI_API_KEY is not configured on the backend.")
-
-GEMINI_MODEL = "gemini-3.6-flash"
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
 
 
 # ============================================================
 # GEMINI CLIENT
 # ============================================================
 
-client = genai.Client(
-    api_key=GEMINI_API_KEY
+client = (
+    genai.Client(api_key=GEMINI_API_KEY)
+    if GEMINI_API_KEY
+    else None
 )
 
 
@@ -220,6 +219,20 @@ def get_bearer_token(
         return None
 
     return token.strip() or None
+
+
+def require_user(authorization: Optional[str] = None):
+    """Return the authenticated user or raise HTTP 401."""
+    token = get_bearer_token(authorization)
+    user = get_user_from_token(token)
+
+    if user is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Authentication required."
+        )
+
+    return user
 
 
 # ============================================================
@@ -1058,6 +1071,21 @@ Do not write anything outside the JSON.
             total_hours
         )
 
+        # Save/update the student's subjects for adaptive features.
+        if logged_in_user:
+            db = get_db()
+
+            for subject in request.subjects:
+                ensure_subject_record(
+                    db=db,
+                    user_id=logged_in_user["id"],
+                    subject=subject.name,
+                    difficulty=subject.difficulty,
+                    confidence=subject.confidence
+                )
+
+            db.commit()
+            db.close()
 
         return data
 
@@ -1118,24 +1146,137 @@ Do not write anything outside the JSON.
 
 def ensure_extra_tables():
     db = get_db()
-    db.execute('CREATE TABLE IF NOT EXISTS study_sessions (id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER,subject TEXT,topic TEXT,minutes INTEGER,confidence_before INTEGER,confidence_after INTEGER,created_at TEXT)')
-    db.execute('CREATE TABLE IF NOT EXISTS quiz_results (id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER,subject TEXT,topic TEXT,score INTEGER,total INTEGER,created_at TEXT)')
-    db.execute('CREATE TABLE IF NOT EXISTS revision_items (id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER,subject TEXT,topic TEXT,next_revision TEXT,interval_days INTEGER,mastery REAL)')
-    db.commit(); db.close()
+
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS subjects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            difficulty TEXT DEFAULT 'medium',
+            confidence INTEGER DEFAULT 3,
+            mastery REAL DEFAULT 0,
+            total_quiz_questions INTEGER DEFAULT 0,
+            correct_quiz_questions INTEGER DEFAULT 0,
+            total_study_minutes INTEGER DEFAULT 0,
+            UNIQUE(user_id, name)
+        )
+    """)
+
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS study_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            subject TEXT,
+            topic TEXT,
+            minutes INTEGER,
+            confidence_before INTEGER,
+            confidence_after INTEGER,
+            created_at TEXT
+        )
+    """)
+
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS quiz_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            subject TEXT,
+            topic TEXT,
+            score INTEGER,
+            total INTEGER,
+            created_at TEXT
+        )
+    """)
+
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS revision_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            subject TEXT,
+            topic TEXT,
+            next_revision TEXT,
+            interval_days INTEGER,
+            mastery REAL
+        )
+    """)
+
+    db.commit()
+    db.close()
+
+
+def ensure_subject_record(
+    db,
+    user_id: int,
+    subject: str,
+    difficulty: str = "medium",
+    confidence: int = 3
+):
+    subject = subject.strip()
+
+    if not subject:
+        return
+
+    db.execute(
+        """
+        INSERT OR IGNORE INTO subjects
+        (user_id, name, difficulty, confidence)
+        VALUES (?, ?, ?, ?)
+        """,
+        (user_id, subject, difficulty, confidence)
+    )
+
 
 ensure_extra_tables()
 
+
 def ai_json(prompt: str):
     if client is None:
-        raise HTTPException(503, 'Gemini is not configured. Add GEMINI_API_KEY to the backend.')
+        raise HTTPException(
+            status_code=503,
+            detail="Gemini is not configured. Add GEMINI_API_KEY to the backend."
+        )
+
     try:
-        r = client.models.generate_content(model=GEMINI_MODEL, contents=prompt, config=types.GenerateContentConfig(response_mime_type='application/json'))
-        raw = (r.text or '').strip().replace('```json','').replace('```','').strip()
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json"
+            )
+        )
+
+        raw = (response.text or "").strip()
+
+        if raw.startswith("```"):
+            raw = (
+                raw
+                .replace("```json", "")
+                .replace("```", "")
+                .strip()
+            )
+
+        if not raw:
+            raise HTTPException(
+                status_code=502,
+                detail="Gemini returned an empty response."
+            )
+
         return json.loads(raw)
+
+    except HTTPException:
+        raise
+
     except json.JSONDecodeError:
-        raise HTTPException(502, 'Gemini returned invalid JSON.')
-    except Exception as e:
-        print('Gemini:', repr(e)); raise HTTPException(502, 'Gemini request failed.')
+        raise HTTPException(
+            status_code=502,
+            detail="Gemini returned invalid JSON."
+        )
+
+    except Exception as error:
+        print("Gemini:", repr(error))
+        raise HTTPException(
+            status_code=502,
+            detail="Gemini request failed."
+        )
 
 class QuizRequest(BaseModel):
     subject: str
@@ -1202,9 +1343,35 @@ def quiz_generate(req: QuizRequest, authorization: Optional[str] = Header(defaul
 
 @app.post('/api/quiz/submit')
 def quiz_submit(req: QuizSubmit, authorization: Optional[str] = Header(default=None)):
-    user=require_user(authorization); db=get_db()
-    db.execute('INSERT INTO quiz_results(user_id,subject,topic,score,total,created_at) VALUES(?,?,?,?,?,?)',(user['id'],req.subject,req.topic,req.score,req.total,datetime.utcnow().isoformat()))
-    row=db.execute('SELECT * FROM subjects WHERE user_id=? AND name=?',(user['id'],req.subject)).fetchone()
+    user = require_user(authorization)
+    db = get_db()
+
+    ensure_subject_record(
+        db,
+        user["id"],
+        req.subject
+    )
+
+    db.execute(
+        """
+        INSERT INTO quiz_results
+        (user_id, subject, topic, score, total, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            user["id"],
+            req.subject,
+            req.topic,
+            req.score,
+            req.total,
+            datetime.utcnow().isoformat()
+        )
+    )
+
+    row = db.execute(
+        "SELECT * FROM subjects WHERE user_id=? AND name=?",
+        (user["id"], req.subject)
+    ).fetchone()
     acc=req.score/req.total
     if row:
         nt=row['total_quiz_questions']+req.total; nc=row['correct_quiz_questions']+req.score; mastery=round(.75*(nc/nt)+.25*(row['confidence']/5),3)
@@ -1216,10 +1383,53 @@ def quiz_submit(req: QuizSubmit, authorization: Optional[str] = Header(default=N
 
 @app.post('/api/session')
 def study_session(req: StudySessionRequest, authorization: Optional[str] = Header(default=None)):
-    user=require_user(authorization); db=get_db()
-    db.execute('INSERT INTO study_sessions(user_id,subject,topic,minutes,confidence_before,confidence_after,created_at) VALUES(?,?,?,?,?,?,?)',(user['id'],req.subject,req.topic,req.minutes,req.confidence_before,req.confidence_after,datetime.utcnow().isoformat()))
-    db.execute('UPDATE subjects SET total_study_minutes=total_study_minutes+? WHERE user_id=? AND name=?',(req.minutes,user['id'],req.subject)); db.commit(); db.close()
-    return {'success':True}
+    user = require_user(authorization)
+    db = get_db()
+
+    ensure_subject_record(
+        db,
+        user["id"],
+        req.subject,
+        confidence=req.confidence_after
+    )
+
+    db.execute(
+        """
+        INSERT INTO study_sessions
+        (user_id, subject, topic, minutes,
+         confidence_before, confidence_after, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            user["id"],
+            req.subject,
+            req.topic,
+            req.minutes,
+            req.confidence_before,
+            req.confidence_after,
+            datetime.utcnow().isoformat()
+        )
+    )
+
+    db.execute(
+        """
+        UPDATE subjects
+        SET total_study_minutes = total_study_minutes + ?,
+            confidence = ?
+        WHERE user_id = ? AND name = ?
+        """,
+        (
+            req.minutes,
+            req.confidence_after,
+            user["id"],
+            req.subject
+        )
+    )
+
+    db.commit()
+    db.close()
+
+    return {"success": True}
 
 @app.post('/api/teach')
 def teach(req: TeachRequest, authorization: Optional[str] = Header(default=None)):
