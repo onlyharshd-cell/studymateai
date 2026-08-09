@@ -1,4 +1,6 @@
 from fastapi import FastAPI, HTTPException, Header, UploadFile, File
+from fastapi.responses import FileResponse
+from pathlib import Path
 from fastapi.middleware.cors import CORSMiddleware
 
 from pydantic import BaseModel, Field
@@ -254,6 +256,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://steady-mousse-0ae4ab.netlify.app",
+        "https://studymateai-weld.vercel.app",
         "http://localhost:5500",
         "http://127.0.0.1:5500",
         "http://localhost:3000",
@@ -619,15 +622,21 @@ def logout(
 # ROOT
 # ============================================================
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def root():
+    """Serve the StudyMate frontend from the Vercel deployment root."""
+    frontend = Path(__file__).resolve().parent.parent / "index.html"
 
-    return {
-        "message": "StudyMate AI Backend is running 🚀",
-        "framework": "FastAPI",
-        "ai": "Gemini",
-        "model": GEMINI_MODEL
-    }
+    if not frontend.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Frontend index.html was not found."
+        )
+
+    return FileResponse(
+        path=frontend,
+        media_type="text/html"
+    )
 
 
 # ============================================================
@@ -653,6 +662,12 @@ def health():
 
 @app.get("/api/test-gemini")
 def test_gemini():
+
+    if client is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Gemini is not configured. Add GEMINI_API_KEY in Vercel Environment Variables."
+        )
 
     try:
 
