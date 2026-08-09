@@ -320,6 +320,28 @@ button{cursor:pointer}
 .strategy li{font-size:9px;color:#cbd2df;line-height:1.6;display:flex;gap:8px}
 .strategy li:before{content:"✓";color:var(--green);font-weight:800}
 .empty{font-size:10px;color:var(--muted)}
+.wide{width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hint{color:var(--muted);font-size:9px;line-height:1.6}
+.mainbtn{
+    margin-top:10px;
+    border:1px solid var(--border);
+    background:linear-gradient(135deg,var(--primary),#5e49d8);
+    color:#fff;
+    border-radius:9px;
+    padding:10px 13px;
+    font-size:9px;
+    font-weight:800;
+    cursor:pointer;
+}
+.mainbtn:hover{filter:brightness(1.08)}
+.mainbtn:disabled{opacity:.55;cursor:not-allowed}
+.quizOption{cursor:pointer}
+.quizOption:hover{border-color:var(--primary)!important}
+@media(max-width:650px){
+    .two{grid-template-columns:1fr}
+}
+
 
 .loader{
     position:fixed;inset:0;z-index:999;display:grid;place-items:center;
@@ -667,9 +689,57 @@ button{cursor:pointer}
    CONFIG
 ============================================================ */
 
-const API_URL = "https://studymateai-weld.vercel.app";
+const API_URL = "";
 const TOKEN_KEY = "studymate_access_token";
 const USER_KEY = "studymate_user";
+
+
+/* ============================================================
+   API HELPERS
+============================================================ */
+
+function $(id) {
+    return document.getElementById(id);
+}
+
+function esc(value) {
+    return escapeHTML(value);
+}
+
+async function api(path, options = {}) {
+    const token = localStorage.getItem(TOKEN_KEY);
+
+    const headers = new Headers(options.headers || {});
+
+    if (!(options.body instanceof FormData) && !headers.has("Content-Type")) {
+        headers.set("Content-Type", "application/json");
+    }
+
+    if (token) {
+        headers.set("Authorization", "Bearer " + token);
+    }
+
+    const response = await fetch(API_URL + path, {
+        ...options,
+        headers
+    });
+
+    const data = await readJSON(response);
+
+    if (!response.ok) {
+        throw new Error(
+            data.detail ||
+            data.message ||
+            `Request failed (${response.status}).`
+        );
+    }
+
+    return data;
+}
+
+function loading(active, title = "", text = "") {
+    setLoading(active, title, text);
+}
 
 
 /* ============================================================
@@ -1689,46 +1759,6 @@ function setLoading(active,title="",text=""){
 }
 
 
-// ===== StudyMate API helper =====
-async function api(path, options = {}) {
-    const token = localStorage.getItem(TOKEN_KEY);
-
-    const headers = new Headers(options.headers || {});
-
-    if (!(options.body instanceof FormData) && !headers.has("Content-Type")) {
-        headers.set("Content-Type", "application/json");
-    }
-
-    if (token) {
-        headers.set("Authorization", "Bearer " + token);
-    }
-
-    const response = await fetch(API_URL + path, {
-        ...options,
-        headers
-    });
-
-    const data = await readJSON(response);
-
-    if (!response.ok) {
-        throw new Error(
-            data.detail ||
-            data.message ||
-            `Request failed (${response.status}).`
-        );
-    }
-
-    return data;
-}
-
-function esc(value) {
-    return escapeHTML(value);
-}
-
-function loading(active, title = "", text = "") {
-    setLoading(active, title, text);
-}
-
 // ===== StudyMate adaptive feature layer =====
 async function smart(path, options={}) { return api(path, options); }
 
@@ -1737,14 +1767,14 @@ async function loadKnowledgeMap(){
     const d=await smart('/api/knowledge-map');
     const a=d.subjects||[];
     if(!a.length){$('knowledge').textContent='Add subjects to start your knowledge map.';return;}
-    $('knowledge').innerHTML=a.map(x=>`<div style="margin:7px 0"><b>${esc(x.subject)}</b> <span style="float:right;color:var(--p2)">${Math.round(x.mastery*100)}%</span><br><small>${Math.round(x.quiz_accuracy*100)}% quiz accuracy • ${x.study_minutes||0} study minutes</small></div>`).join('');
+    $('knowledge').innerHTML=a.map(x=>`<div style="margin:7px 0"><b>${esc(x.subject)}</b> <span style="float:right;color:var(--primary2)">${Math.round(x.mastery*100)}%</span><br><small>${Math.round(x.quiz_accuracy*100)}% quiz accuracy • ${x.study_minutes||0} study minutes</small></div>`).join('');
   }catch(e){$('knowledge').textContent=e.message}
 }
 
 async function loadNextAction(){
   try{
     const d=await smart('/api/next-action',{method:'POST',body:JSON.stringify({goal:$('goal')?.value||'',exam_date:$('examDate')?.value||null})});
-    $('nextAction').innerHTML=`<b>${esc(d.title)}</b><br>${esc(d.reason)}<br><span style="color:var(--p2)">${esc(d.subject||'')} • ${d.duration_minutes||30} min</span>`;
+    $('nextAction').innerHTML=`<b>${esc(d.title)}</b><br>${esc(d.reason)}<br><span style="color:var(--primary2)">${esc(d.subject||'')} • ${d.duration_minutes||30} min</span>`;
   }catch(e){$('nextAction').textContent=e.message}
 }
 
@@ -1758,8 +1788,8 @@ $('qGen')?.addEventListener('click',async()=>{
     loading(true,'Generating checkpoint...','The AI is testing actual understanding.');
     const d=await smart('/api/quiz/generate',{method:'POST',body:JSON.stringify({subject,topic,count:5,difficulty:'medium'})});
     window.studyMateQuiz=d;
-    $('quizArea').innerHTML=(d.questions||[]).map((q,i)=>`<div style="border:1px solid var(--line);padding:11px;border-radius:9px;margin-top:8px"><b style="font-size:10px">${i+1}. ${esc(q.question)}</b><div>${q.options.map((o,j)=>`<button class="quizOption" data-q="${i}" data-a="${j}" style="display:block;width:100%;text-align:left;margin-top:5px;background:#080d15;color:#ddd;border:1px solid var(--line);border-radius:7px;padding:8px;font-size:9px">${esc(o)}</button>`).join('')}</div></div>`).join('')+'<button id="quizSubmit" class="mainbtn">Submit checkpoint</button>';
-    document.querySelectorAll('.quizOption').forEach(b=>b.onclick=()=>{document.querySelectorAll(`.quizOption[data-q="${b.dataset.q}"]`).forEach(x=>x.style.borderColor='var(--line)');b.style.borderColor='var(--p)';b.classList.add('chosen')});
+    $('quizArea').innerHTML=(d.questions||[]).map((q,i)=>`<div style="border:1px solid var(--border);padding:11px;border-radius:9px;margin-top:8px"><b style="font-size:10px">${i+1}. ${esc(q.question)}</b><div>${q.options.map((o,j)=>`<button class="quizOption" data-q="${i}" data-a="${j}" style="display:block;width:100%;text-align:left;margin-top:5px;background:#080d15;color:#ddd;border:1px solid var(--border);border-radius:7px;padding:8px;font-size:9px">${esc(o)}</button>`).join('')}</div></div>`).join('')+'<button id="quizSubmit" class="mainbtn">Submit checkpoint</button>';
+    document.querySelectorAll('.quizOption').forEach(b=>b.onclick=()=>{document.querySelectorAll(`.quizOption[data-q="${b.dataset.q}"]`).forEach(x=>x.style.borderColor='var(--border)');b.style.borderColor='var(--primary)';b.classList.add('chosen')});
     $('quizSubmit').onclick=async()=>{
       let score=0;const qs=d.questions||[];
       qs.forEach((q,i)=>{const chosen=document.querySelector(`.quizOption.chosen[data-q="${i}"]`);if(chosen&&Number(chosen.dataset.a)===Number(q.answer))score++});
@@ -1780,7 +1810,13 @@ $('sBtn')?.addEventListener('click',async()=>{
 });
 
 const _showApp=showApp;
-showApp=function(){_showApp();setTimeout(()=>{loadKnowledgeMap();loadNextAction()},300)};
+showApp=function(){
+    _showApp();
+    setTimeout(()=>{
+        loadKnowledgeMap();
+        loadNextAction();
+    },300);
+};
 </script>
 
 </body>
